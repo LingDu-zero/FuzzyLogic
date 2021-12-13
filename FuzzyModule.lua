@@ -27,7 +27,7 @@ function FuzzyModule:AddRule(antecendent, consequence)
 end
 
 function FuzzyModule:Fuzzify(NameOfFLV, val)
-	assert(self._m_Variables[NameOfFLV] ~= nil, "key not found")
+	assert(self._m_Variables[NameOfFLV] ~= nil, "Error:Key not found in Variables")
 	self._m_Variables[NameOfFLV]:Fuzzify(val)
 	
 	if self._Debug then
@@ -36,7 +36,7 @@ function FuzzyModule:Fuzzify(NameOfFLV, val)
 end
 
 function FuzzyModule:DeFuzzify(NameOfFLV, method)
-	assert(self._m_Variables[NameOfFLV] ~= nil, "key not found")
+	assert(self._m_Variables[NameOfFLV] ~= nil, "Error:Key not found in Variables")
 	_SetConfidencesOfConsequentsToZero(self)
 	
 	for k,v in ipairs(self._m_Rules) do
