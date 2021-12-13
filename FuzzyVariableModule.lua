@@ -2,6 +2,9 @@ local FuzzySetLeftShoulder = require(script.Parent.FuzzySet.FuzzySetLeftShoulder
 local FuzzySetRightShoulder = require(script.Parent.FuzzySet.FuzzySetRightShoulderModule)
 local FuzzySetTriangle = require(script.Parent.FuzzySet.FuzzySetTriangleModule)
 local FuzzySetSingleton = require(script.Parent.FuzzySet.FuzzySetSingletonModule)
+local FuzzySetTrapezoid = require(script.Parent.FuzzySet.FuzzySetTrapezoidModule)
+local FuzzySetSigmoid = require(script.Parent.FuzzySet.FuzzySetSigmoidModule)
+
 local FzSet = require(script.Parent.FzSetModule)
 
 local FuzzyVariableModule = class('FuzzyVariableModule')
@@ -22,31 +25,50 @@ local _AdjustRangeToFit = function (self, minBound, maxBound)
 end
 
 function FuzzyVariableModule:AddLeftShoulderSet(name, minBound, peak, maxBound)
+	assert((peak < maxBound) and (peak >= minBound), "Error: Incorrect value in generate "..name.." LeftShoulderSet!")
 	self._m_MemberSets[name] = FuzzySetLeftShoulder:new(peak, peak-minBound, maxBound-peak)
 	_AdjustRangeToFit(self, minBound, maxBound)
 	return FzSet:new(self._m_MemberSets[name])
 end
 
 function FuzzyVariableModule:AddRightShoulderSet(name, minBound, peak, maxBound)
+	assert((peak <= maxBound) and (peak > minBound), "Error: Incorrect value in generate "..name.." RightShoulderSet!")
 	self._m_MemberSets[name] = FuzzySetRightShoulder:new(peak, peak-minBound, maxBound-peak)
 	_AdjustRangeToFit(self, minBound, maxBound)
 	return FzSet:new(self._m_MemberSets[name])
 end
 
 function FuzzyVariableModule:AddTriangularSet(name, minBound, peak, maxBound)
+	assert((peak <= maxBound) and (peak >= minBound), "Error: Incorrect value in generate "..name.." TriangularSet!")
 	self._m_MemberSets[name] = FuzzySetTriangle:new(peak, peak-minBound, maxBound-peak)
 	_AdjustRangeToFit(self, minBound, maxBound)
 	return FzSet:new(self._m_MemberSets[name])
 end
 
 function FuzzyVariableModule:AddSingletonSet(name, minBound, peak, maxBound)
+	assert((peak <= maxBound) and (peak >= minBound), "Error: Incorrect value in generate "..name.." SingletonSet!")
 	self._m_MemberSets[name] = FuzzySetSingleton:new(peak, peak-minBound, maxBound-peak)
 	_AdjustRangeToFit(self, minBound, maxBound)
 	return FzSet:new(self._m_MemberSets[name])
 end
 
+function FuzzyVariableModule:AddTrapezoidSet(name, minBound, leftpeak, rightpeak, maxBound)
+	assert((rightpeak > leftpeak) and (rightpeak <= maxBound) and (leftpeak >= minBound) , "Error: Incorrect value in generate "..name.." TrapezoidSet!")
+	self._m_MemberSets[name] = FuzzySetTrapezoid:new(leftpeak, rightpeak, leftpeak-minBound, maxBound-rightpeak)
+	_AdjustRangeToFit(self, minBound, maxBound)
+	return FzSet:new(self._m_MemberSets[name])
+end
+
+function FuzzyVariableModule:AddSigmoidSet(name, minBound, mid, maxBound, k)
+	assert((mid <= maxBound) and (mid >= minBound), "Error: Incorrect value in generate "..name.." SigmoidSet!")
+	k = k or 1
+	self._m_MemberSets[name] = FuzzySetSigmoid:new(mid, mid-minBound, maxBound-mid, k)
+	_AdjustRangeToFit(self, minBound, maxBound)
+	return FzSet:new(self._m_MemberSets[name])
+end
+
 function FuzzyVariableModule:Fuzzify(val)
-	assert(val <= self._m_dMaxRange and val >= self._m_dMinRange, "Value out of range.")
+	assert(val <= self._m_dMaxRange and val >= self._m_dMinRange, "Value out of range in Fuzzify.")
 	for k,v in pairs(self._m_MemberSets) do
 		v:SetDOM(v:CalculateDOM(val))
 	end
